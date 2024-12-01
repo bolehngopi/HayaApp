@@ -53,9 +53,6 @@ export const Navbar = () => {
               <NavLink className="hover:text-gray-300" to="categories">
                 Categories
               </NavLink>
-              <NavLink className="hover:text-gray-300" to="contact">
-                Contact
-              </NavLink>
             </nav>
 
             {/* Profile & Auth Actions */}
@@ -73,50 +70,78 @@ export const Navbar = () => {
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md">
-                  {session.session_id ? (
-                    <>
-                      <NavLink
-                        className="block px-4 py-2 hover:bg-gray-200"
-                        to="profile"
-                      >
-                        My Profile
-                      </NavLink>
-                      <NavLink
-                        className="block px-4 py-2 hover:bg-gray-200"
-                        to="cart"
-                      >
-                        My Cart
-                      </NavLink>
-                      <NavLink
-                        className="block px-4 py-2 hover:bg-gray-200"
-                        to="orders"
-                      >
-                        Orders
-                      </NavLink>
+                <div
+                  className="absolute end-0 z-10 mt-0.5 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
+                  role="menu"
+                >
+                  <div className="p-2">
+                    {session.session_id ? (
+                      <>
+                        <NavLink
+                          to="profile"
+                          className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                          role="menuitem"
+                        >
+                          My profile
+                        </NavLink>
+
+                        <NavLink
+                          to="cart"
+                          className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                          role="menuitem"
+                        >
+                          My Cart
+                        </NavLink>
+
+                        <NavLink
+                          to={'orders'}
+                          className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                          role="menuitem"
+                        >
+                          My Orders
+                        </NavLink>
+                      </>
+                    ) : (
+                      <>
+                        <span className="block rounded-lg px-4 py-2 text-sm text-gray-500">
+                          Welcome, Guest!
+                        </span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="p-2">
+                    {session.session_id ? (
                       <button
-                        className="block px-4 py-2 w-full text-left text-red-600 hover:bg-red-50"
+                        type="submit"
+                        className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                        role="menuitem"
                         onClick={handleLogout}
                       >
-                        <HiOutlineArrowUturnLeft /> Logout
+                        <HiOutlineArrowUturnLeft />
+                        Logout
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <NavLink
-                        className="block px-4 py-2 hover:bg-gray-200"
-                        to="login"
-                      >
-                        <AiOutlineLogin /> Login
-                      </NavLink>
-                      <NavLink
-                        className="block px-4 py-2 hover:bg-gray-200"
-                        to="register"
-                      >
-                        <CiPen /> Register
-                      </NavLink>
-                    </>
-                  )}
+                    ) : (
+                      <>
+                        <NavLink
+                          className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-green-700 hover:bg-green-50"
+                          to={'login'}
+                          role="menuitem"
+                        >
+                          <AiOutlineLogin />
+                          Login
+                        </NavLink>
+                        <NavLink
+                          className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-blue-700 hover:bg-blue-50"
+                          to={'register'}
+                          role="menuitem"
+                        >
+                          <CiPen />
+                          Register
+                        </NavLink>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -168,13 +193,6 @@ export const Navbar = () => {
             onClick={() => setIsOpen(false)}
           >
             Categories
-          </NavLink>
-          <NavLink
-            className="block px-4 py-2 hover:bg-gray-200"
-            to="contact"
-            onClick={() => setIsOpen(false)}
-          >
-            Contact
           </NavLink>
           <NavLink
             className="block px-4 py-2 hover:bg-gray-200"

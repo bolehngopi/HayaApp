@@ -1,12 +1,17 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { BsFillCartPlusFill } from "react-icons/bs";
+import { RiArrowGoBackLine } from "react-icons/ri";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../api/apiClient";
+import { useEffect } from "react";
 
 export const ProductDetail = () => {
-  const { id } = useParams(); // Get product ID from URL
-  const [product, setProduct] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  let { id } = useParams();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -25,81 +30,89 @@ export const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <p>Loading product...</p>
-      </div>
+  const handleQuantityChange = (type) => {
+    setQuantity((prev) =>
+      type === "increase"
+        ? Math.min(prev + 1, product.stock)
+        : prev > 1
+          ? prev - 1
+          : 1
     );
-  }
+  };
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
+  const handleAddToCart = async () => {
+    try {
+      const response = await apiClient.post("/cart", {
+        product_id: product.id,
+        quantity: quantity,
+      });
+      console.log(response.data.data);
+      alert("Product added to cart!");
+      if (confirm("Do you want to view your cart?")) {
+        navigate("/cart");
+      }
+    } catch (error) {
+      console.log("Error adding to cart", error);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10">
-      <div className="container mx-auto px-4">
-        {/* Product Display */}
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Product Image */}
-            <div className="flex justify-center items-center bg-gray-100">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="max-h-[600px] object-contain"
-              />
-            </div>
-
-            {/* Product Details */}
-            <div className="p-6">
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                {product.name}
-              </h1>
-              <p className="text-lg text-gray-600 mb-4">{product.description}</p>
-              <p className="text-2xl font-semibold text-blue-500 mb-4">
-                ${product.price}
-              </p>
-
-              {/* Add to Cart Button */}
-              <button
-                onClick={() => addToCart(product)}
-                className="w-full bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 transition"
-              >
-                Add to Cart
-              </button>
-            </div>
-          </div>
+    <div className="max-w-screen-lg mx-auto px-4 py-8 min-h-dvh place-content-center">
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Product Image */}
+        <div className="flex-1">
+          <img
+            src={product.image_cover}
+            alt={`Image for product ${product.name}`}
+            className="w-full object-cover rounded-lg shadow-md"
+          />
         </div>
 
-        {/* Additional Information */}
-        <div className="mt-10 bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Additional Details
-          </h2>
-          <ul className="space-y-2">
-            <li>
-              <span className="font-bold">Category:</span> {product.category}
-            </li>
-            <li>
-              <span className="font-bold">Stock:</span> {product.stock}
-            </li>
-            <li>
-              <span className="font-bold">SKU:</span> {product.sku}
-            </li>
-          </ul>
+        {/* Product Info */}
+        <div className="flex-1 flex flex-col gap-4">
+          <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
+          <p className="text-gray-600 text-lg">
+            {product.description}
+          </p>
+          <p className="text-2xl font-semibold text-blue-600">${product.price}</p>
+
+          {/* Quantity Selector */}
+          <div className="flex items-center gap-4">
+            <span className="text-gray-700">Quantity:</span>
+            <button
+              className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100"
+              onClick={() => handleQuantityChange("decrease")}
+            >
+              -
+            </button>
+            <span className="px-4">{quantity}</span>
+            <button
+              className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100"
+              onClick={() => handleQuantityChange("increase")}
+            >
+              +
+            </button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-4">
+            <button
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+              onClick={handleAddToCart}
+            >
+              <BsFillCartPlusFill /> Add to Cart
+            </button>
+          </div>
+
+          {/* Back Button */}
+          <NavLink
+            to="/"
+            className="flex items-center gap-2 mt-4 text-gray-600 hover:text-gray-800"
+          >
+            <RiArrowGoBackLine /> Back to Home
+          </NavLink>
         </div>
       </div>
     </div>
   );
-};
-
-// Simulated addToCart function
-const addToCart = (product) => {
-  alert(`${product.name} added to cart!`);
 };

@@ -9,6 +9,7 @@ import { MainLayout } from './layouts/MainLayout';
 import { ProductDetail } from './pages/product/ProductDetail';
 import { Products } from './pages/product/Products';
 import { Cart } from './pages/Cart';
+import { Checkout } from './pages/Checkout';
 
 export const App = () => {
   return (
@@ -30,6 +31,8 @@ export const App = () => {
               <Route path=':id' element={<ProductDetail />} />
             </Route>
           </Route>
+
+          <Route path='checkout' element={<Checkout />} />
         </Routes>
       </Router>
     </AuthProvider>
