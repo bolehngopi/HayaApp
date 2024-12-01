@@ -14,7 +14,7 @@ export const Login = () => {
   // Prevent logged in user from accessing the login page
   useEffect(() => {
     if (localStorage.getItem("token")) {
-      navigate("/profile");
+      navigate("/profile", { replace: true });
     }
   }, [navigate]);
 
