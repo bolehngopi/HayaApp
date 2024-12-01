@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import apiClient from "../api/apiClient";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export const Checkout = () => {
   const [cart, setCart] = useState([]);
@@ -14,6 +14,13 @@ export const Checkout = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const fetchUserInfo = async () => {
     try {
@@ -127,7 +134,7 @@ export const Checkout = () => {
                   placeholder="Address"
                   className="w-full px-4 py-2 border rounded"
                 />
-                {/* <input
+                <input
                   type="text"
                   name="city"
                   value={shippingInfo.city}
@@ -150,8 +157,21 @@ export const Checkout = () => {
                   onChange={handleInputChange}
                   placeholder="Country"
                   className="w-full px-4 py-2 border rounded"
-                /> */}
+                />
               </form>
+            </div>
+
+            {/* Shipping Address */}
+            <div>
+              <h2 className="text-lg font-semibold">Shipping Address</h2>
+              <div className="pt-2">
+                <p className="text-gray-800">
+                  {shippingInfo.name} <br />
+                  {shippingInfo.address} <br />
+                  {shippingInfo.city}, {shippingInfo.postalCode} <br />
+                  {shippingInfo.country}
+                </p>
+              </div>
             </div>
 
             {/* Payment Method */}

@@ -1,9 +1,17 @@
 import { useState, useEffect } from "react";
 import apiClient from "../api/apiClient";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export const Cart = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const fetchCart = async () => {
     try {
@@ -110,12 +118,12 @@ export const Cart = () => {
                 </dl>
 
                 <div className="flex justify-end">
-                  <a
-                    href="#"
+                  <NavLink
+                    to={"/checkout"}
                     className="block rounded bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600"
                   >
                     Checkout
-                  </a>
+                  </NavLink>
                 </div>
               </div>
             </div>

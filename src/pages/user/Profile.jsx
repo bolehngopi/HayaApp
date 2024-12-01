@@ -9,6 +9,12 @@ export const Profile = () => {
   const [profile, setProfile] = useState({});
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   const getProfile = async () => {
     try {
       const response = await apiClient.get("/auth/profile");
