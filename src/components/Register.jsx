@@ -10,12 +10,13 @@ export const Register = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const { session } = useAuth();
   const navigate = useNavigate();
 
   // Prevent login user from accessing the register page
   useEffect(() => {
-    if (localStorage.getItem("token")) {
-      navigate("/profile", { replace: true });
+    if (session.auth) {
+      navigate("/", { replace: true });
     }
   }, [navigate]);
 

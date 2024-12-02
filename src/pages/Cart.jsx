@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import apiClient from "../api/apiClient";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
 export const Cart = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [totalPrice, setTotalPrice] = useState(0);
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
+    if (!session.auth) {
       navigate("/login");
     }
   }, [navigate]);
@@ -18,13 +21,19 @@ export const Cart = () => {
       const response = await apiClient.get("/cart");
       const data = response.data;
       setCart(data.cart);
-      console.log("Cart data", data);
+      setTotalPrice(data.total_price);
+      // console.log(cart.length)
+      console.log("Cart data", cart);
     } catch (error) {
       console.log("Error fetching cart", error);
     } finally {
       setLoading(false);
     }
   };
+
+  const ppn = totalPrice ? totalPrice * 0.11 : 0;
+
+  const total = totalPrice + ppn;
 
   useEffect(() => {
     document.title = "Cart - E-commerce";
@@ -45,7 +54,7 @@ export const Cart = () => {
 
           <div className="mt-8 min-h-96">
             <ul className="space-y-4">
-              {cart.map((item, i) => (
+              {cart && cart.map((item, i) => (
                 <li className="flex items-center gap-4" key={i}>
                   <img
                     src={item.product.image_cover} // Assuming `image_cover` is inside product
@@ -98,32 +107,29 @@ export const Cart = () => {
                 <dl className="space-y-0.5 text-sm text-gray-700">
                   <div className="flex justify-between">
                     <dt>Subtotal</dt>
-                    <dd>£250</dd>
+                    <dd>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(totalPrice || 0)}</dd>
                   </div>
 
                   <div className="flex justify-between">
-                    <dt>VAT</dt>
-                    <dd>£25</dd>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <dt>Discount</dt>
-                    <dd>-£20</dd>
+                    <dt>PPN (11%)</dt>
+                    <dd>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(ppn)}</dd>
                   </div>
 
                   <div className="flex justify-between !text-base font-medium">
                     <dt>Total</dt>
-                    <dd>£200</dd>
+                    <dd>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(total || 0)}</dd>
                   </div>
                 </dl>
 
                 <div className="flex justify-end">
-                  <NavLink
-                    to={"/checkout"}
-                    className="block rounded bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600"
-                  >
-                    Checkout
-                  </NavLink>
+                  {total > 0 && (
+                    <NavLink
+                      to={"/checkout"}
+                      className="block rounded bg-gray-700 px-5 py-3 text-sm text-gray-100 transition hover:bg-gray-600"
+                    >
+                      Checkout
+                    </NavLink>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import apiClient from "../api/apiClient";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
 export const Checkout = () => {
   const [cart, setCart] = useState([]);
@@ -15,9 +16,10 @@ export const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("creditCard");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
+    if (!session.auth) {
       navigate("/login");
     }
   }, [navigate]);
@@ -26,13 +28,14 @@ export const Checkout = () => {
     try {
       const response = await apiClient.get("/auth/profile");
       const data = response.data.data;
+      console.log(data)
       setShippingInfo((prev) => ({
         ...prev,
         name: data.name,
         address: data.address,
-        // city: data.city,
-        // postalCode: data.postalCode,
-        // country: data.country,
+        city: data.city,
+        postalCode: data.postalCode,
+        country: data.country,
       }));
     } catch (error) {
       console.log("Error fetching user info", error);
@@ -45,9 +48,12 @@ export const Checkout = () => {
       const data = response.data;
       setCart(data.cart);
       setTotalPrice(data.total_price);
+      // console.log(cart.length)
       console.log("Cart data", cart);
     } catch (error) {
       console.log("Error fetching cart", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,16 +70,28 @@ export const Checkout = () => {
     }));
   };
 
+  const ppn = totalPrice ? totalPrice * 0.11 : 0;
+
+  const shipping = totalPrice ? totalPrice * 0.01 : 0;
+
+  const total = shipping ? totalPrice + ppn + shipping : totalPrice + ppn;
+
   const handleCheckout = async () => {
     setLoading(true);
     try {
       const orderData = {
-        cart,
-        shippingInfo,
-        paymentMethod,
+        items: cart.map(item => ({
+          product_id: item.product.id,
+          quantity: item.quantity,
+        })),
+        shipping_address: `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.postalCode}, ${shippingInfo.country}`,
+        total_amount: total.toFixed(2), // Ensure total is an integer
       };
+
       const response = await apiClient.post("/checkout", orderData);
       console.log("Order placed successfully", response.data);
+      alert("Order placed successfully!");
+      navigate("/");
       // Handle successful order placement (redirect, confirmation, etc.)
     } catch (error) {
       console.error("Error placing order", error);
@@ -81,6 +99,8 @@ export const Checkout = () => {
       setLoading(false);
     }
   };
+
+
 
   return (
     <section>
@@ -106,7 +126,7 @@ export const Checkout = () => {
                       <div className="ml-4">
                         <h3 className="text-sm text-gray-900">{item.product.name}</h3>
                         <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                        <p className="text-sm text-gray-600">Price: £{item.product.price}</p>
+                        <p className="text-sm text-gray-600">Price: {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.product.price)}</p>
                       </div>
                     </div>
                   </li>
@@ -228,15 +248,19 @@ export const Checkout = () => {
               <div className="space-y-4 pt-2">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>Rp. {totalPrice}</span>
+                  <span>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(totalPrice)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>Rp. 50.000</span> {/* Example shipping cost */}
+                  <span>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(shipping)}</span> {/* Example shipping cost */}
+                </div>
+                <div className="flex justify-between">
+                  <span>PPN (11%)</span>
+                  <span>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(ppn)}</span> {/* Example shipping cost */}
                 </div>
                 <div className="flex justify-between font-semibold text-xl">
                   <span>Total</span>
-                  <span>Rp. {totalPrice + 50}</span> {/* Total with shipping */}
+                  <span>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(total)}</span> {/* Total with shipping */}
                 </div>
               </div>
             </div>

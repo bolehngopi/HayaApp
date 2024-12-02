@@ -258,7 +258,7 @@ export const Products = () => {
                       <div className="border-t border-gray-200 p-4">
                         <div className="flex justify-between gap-4">
                           <label htmlFor="FilterPriceFrom" className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">$</span>
+                            <span className="text-sm text-gray-600">Rp.</span>
                             <input
                               type="number"
                               id="FilterPriceFrom"
@@ -268,7 +268,7 @@ export const Products = () => {
                             />
                           </label>
                           <label htmlFor="FilterPriceTo" className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">$</span>
+                            <span className="text-sm text-gray-600">Rp.</span>
                             <input
                               type="number"
                               id="FilterPriceTo"
@@ -302,7 +302,7 @@ export const Products = () => {
                             {item.name}
                           </h3>
                           <p className="mt-2">
-                            <span className="tracking-wider text-gray-900">${item.price}</span>
+                            <span className="tracking-wider text-gray-900">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.price)}</span>
                           </p>
                         </div>
                       </a>

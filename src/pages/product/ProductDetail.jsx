@@ -74,7 +74,7 @@ export const ProductDetail = () => {
           <p className="text-gray-600 text-lg">
             {product.description}
           </p>
-          <p className="text-2xl font-semibold text-blue-600">${product.price}</p>
+          <p className="text-2xl font-semibold text-blue-600">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(product.price)}</p>
 
           {/* Quantity Selector */}
           <div className="flex items-center gap-4">

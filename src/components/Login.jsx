@@ -10,11 +10,12 @@ export const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { session } = useAuth();
 
   // Prevent logged in user from accessing the login page
   useEffect(() => {
-    if (localStorage.getItem("token")) {
-      navigate("/profile", { replace: true });
+    if (session.auth) {
+      navigate("/", { replace: true });
     }
   }, [navigate]);
 

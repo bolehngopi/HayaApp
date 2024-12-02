@@ -3,34 +3,92 @@ import apiClient from "../api/apiClient";
 import { AuthContext } from "../context/AuthContext";
 
 export const AuthProvider = ({ children }) => {
-  const [session, setSession] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [session, setSession] = useState(() => {
+    // Initialize session data from localStorage
+    const storedSession = localStorage.getItem("session");
+    return storedSession ? JSON.parse(storedSession) : { isAdmin: false, auth: false };
+  });
+
+  const [user, setUser] = useState(null); // Store user data separately
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load the token from localStorage if it exists
+  const [token, setToken] = useState(() => localStorage.getItem("token") || null);
 
   useEffect(() => {
-    const session_id = localStorage.getItem("cred");
-    if (session_id) {
-      setSession({ session_id });
+    if (token) {
+      fetchUserData(token); // Fetch user data if the token is available
+    } else {
+      setLoading(false); // Set loading to false if no token exists
     }
-    setLoading(false);
-  }, []);
+  }, [token]);
+
+  useEffect(() => {
+    // Synchronize session with localStorage
+    localStorage.setItem("session", JSON.stringify(session));
+  }, [session]);
+
+  /**
+   * Fetch user data using the stored token
+   */
+  const fetchUserData = async (token) => {
+    try {
+      const response = await apiClient.get("/auth/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        const userData = response.data.data;
+        setUser(userData);
+        setSession((prevSession) => ({
+          ...prevSession,
+          auth: true,
+          isAdmin: userData.role.name === "admin", // Check if user is admin
+        }));
+        setError(null);
+      } else {
+        setError("Unable to fetch user data.");
+        logout(); // Clear session on failed fetch
+      }
+    } catch (error) {
+      setError("Error fetching user data.");
+      logout(); // Handle failed token
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /**
    * Login a user
    */
   const login = async (email, password) => {
+    setLoading(true);
     try {
       const response = await apiClient.post("/auth/login", { email, password });
-      const token = response.data.token;
+      const { token, session_id, user } = response.data;
 
       if (response.status === 201) {
-        localStorage.setItem("cred", response.data.user.id);
+        // Set the token in localStorage
         localStorage.setItem("token", token);
-        setSession(response.data.user);
+
+        setToken(token); // Update token state
+        setSession({
+          session_id,
+          isAdmin: user.role.name === "admin", // Check if user is admin
+          auth: true,
+        });
+        setUser(user);
+        setError(null);
       } else {
-        console.log("Invalid credentials");
+        setError("Invalid credentials.");
       }
     } catch (error) {
-      console.log(error);
+      setError("An error occurred during login. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -38,16 +96,20 @@ export const AuthProvider = ({ children }) => {
    * Register a user
    */
   const register = async (name, email, password) => {
+    setLoading(true);
     try {
       const response = await apiClient.post("/auth/register", { name, email, password });
 
       if (response.status === 201) {
+        setError(null);
         console.log("User registered successfully");
       } else {
-        console.log("Error registering user");
+        setError("Error registering user. Please try again.");
       }
     } catch (error) {
-      console.log(error);
+      setError("An error occurred during registration. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,19 +117,25 @@ export const AuthProvider = ({ children }) => {
    * Logout a user
    */
   const logout = async () => {
+    setLoading(true);
     try {
-      await apiClient.post("/logout");
-
-      localStorage.removeItem("token");
-      setSession({});
+      await apiClient.post("/auth/logout");
+      localStorage.removeItem("token"); // Remove token from localStorage
+      setToken(null); // Reset token state
+      setSession({ isAdmin: false, auth: false }); // Reset session state
+      setUser(null);
     } catch (error) {
-      console.log(error);
+      setToken(null);
+      setSession({ isAdmin: false, auth: false });
+      setUser(null);
+      setError("An error occurred during logout. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
-
   return (
-    <AuthContext.Provider value={{ session, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ session, user, loading, error, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

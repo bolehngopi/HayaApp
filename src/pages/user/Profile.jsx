@@ -10,7 +10,7 @@ export const Profile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!localStorage.getItem("token")) {
+    if (!session.auth) {
       navigate("/login");
     }
   }, [navigate]);

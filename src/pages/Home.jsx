@@ -5,6 +5,7 @@ import apiClient from "../api/apiClient";
 
 export const Home = () => {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const fetchProducts = async () => {
     try {
@@ -17,8 +18,20 @@ export const Home = () => {
     }
   }
 
+  const fetchCategories = async () => {
+    try {
+      const response = await apiClient.get("/categories");
+      console.log("response", response.data);
+      const data = response.data;
+      setCategories(data);
+    } catch (error) {
+      console.error("Error fetching categories", error);
+    }
+  }
+
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   return (<>
@@ -53,26 +66,6 @@ export const Home = () => {
         <h2 className="text-2xl font-bold text-center mb-6">New Products</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 container mx-auto">
           {products.map((item, index) => (
-            /* <div
-              key={index}
-              className="bg-white rounded-lg shadow-md overflow-hidden"
-            >
-              <img
-                
-                
-                className="w-full h-32 object-cover sm:h-40"
-              />
-              <div className="p-4">
-                <h3 className="text-sm font-bold">{item.name}</h3>
-                <p className="text-xs text-gray-600">${item.price}</p>
-                <Link
-                  to={`/product/${item.id}`}
-                  className="text-blue-500 text-sm mt-2 block"
-                >
-                  View Details
-                </Link>
-              </div>
-            </div> */
             (<a href={`/product/${item.id}`} className="group block" key={index}>
               <img
                 src={item.image_cover ? item.image_cover : `https://via.placeholder.com/300x200?text=Product+${item.name}`}
@@ -84,7 +77,7 @@ export const Home = () => {
                   {item.name}
                 </h3>
 
-                <p className="mt-1 text-sm text-gray-700">${item.price}</p>
+                <p className="mt-1 text-sm text-gray-700">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.price)}</p>
               </div>
             </a>)
           ))}
@@ -95,18 +88,18 @@ export const Home = () => {
       <section className="bg-gray-100 py-8 px-4" >
         <h2 className="text-2xl font-bold text-center mb-6">Shop by Category</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 container mx-auto">
-          {["Electronics", "Fashion", "Home", "Beauty"].map((category, i) => (
-            <NavLink href="#" className="group relative block hover:shadow-2xl transition-all" key={i} to={`categories#${category.toLowerCase()}`}>
+          {categories.length > 0 && categories.map((category, i) => (
+            <NavLink href="#" className="group relative block hover:shadow-2xl transition-all" key={i} to={`categories#${category.name.toLowerCase()}`}>
               <div className="relative h-[350px] sm:h-[450px]">
                 <img
-                  src="https://images.unsplash.com/photo-1593795899768-947c4929449d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2672&q=80"
+                  src={category.image_cover || `https://images.unsplash.com/photo-1593795899768-947c4929449d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2672&q=80`}
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover opacity-100"
                 />
               </div>
 
               <div className="absolute inset-0 flex flex-col items-start justify-end p-6">
-                <h3 className="text-xl font-medium text-white">{category}</h3>
+                <h3 className="text-xl font-medium text-white">{category.name}</h3>
 
                 <p className="mt-1.5 text-pretty text-xs text-white">
                   {category.description}

@@ -75,7 +75,7 @@ export const Navbar = () => {
                   role="menu"
                 >
                   <div className="p-2">
-                    {session.session_id ? (
+                    {session.auth ? (
                       <>
                         <NavLink
                           to="profile"
@@ -94,7 +94,7 @@ export const Navbar = () => {
                         </NavLink>
 
                         <NavLink
-                          to={'orders'}
+                          to={'transactions'}
                           className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
                           role="menuitem"
                         >
@@ -111,7 +111,7 @@ export const Navbar = () => {
                   </div>
 
                   <div className="p-2">
-                    {session.session_id ? (
+                    {session.auth  ? (
                       <button
                         type="submit"
                         className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-red-50"
