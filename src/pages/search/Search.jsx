@@ -28,7 +28,9 @@ const Search = () => {
 
     try {
       const response = await apiClient(`/search?query=${encodeURI(query)}`);
+      
       setResults(response.data.results);
+      
     } catch (error) {
       console.error('Error fetching search results:', error);
       setResults([]);

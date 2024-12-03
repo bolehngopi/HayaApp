@@ -1,5 +1,5 @@
 import { useState } from "react";
-import apiClient from "../api/apiClient";
+import apiClient from "../../api/apiClient";
 
 const ProductForm = ({ product, onClose }) => {
   const [formData, setFormData] = useState({
@@ -8,7 +8,7 @@ const ProductForm = ({ product, onClose }) => {
     price: product?.price || "",
     stock: product?.stock || "",
     category_id: product?.category_id || "",
-    image_cover: null, // For storing the uploaded image file
+    image_cover: null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,27 +18,29 @@ const ProductForm = ({ product, onClose }) => {
     setLoading(true);
 
     const formDataToSubmit = new FormData();
-
-    // Append all form data fields to FormData object
     Object.entries(formData).forEach(([key, value]) => {
-      if (value) {
+      // Only append non-empty values
+      if (value !== "" && value !== null) {
         formDataToSubmit.append(key, value);
       }
     });
 
+    console.log([...formDataToSubmit.entries()]); // To check form data
+
     try {
       const response = product
         ? await apiClient.put(`/products/${product.id}`, formDataToSubmit, {
-            headers: { "Content-Type": "multipart/form-data" },
-          })
+          headers: { "Content-Type": "multipart/form-data" },
+        })
         : await apiClient.post("/products", formDataToSubmit, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
       alert(response.data.message);
       onClose();
     } catch (error) {
-      setError("Failed to save product.", error);
+      setError("Failed to save product.");
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -50,7 +52,9 @@ const ProductForm = ({ product, onClose }) => {
   };
 
   const handleFileChange = (e) => {
-    setFormData({ ...formData, image_cover: e.target.files[0] });
+    const file = e.target.files[0];
+    setFormData({ ...formData, image_cover: file });
+    console.log("Selected file:", file);
   };
 
   return (
@@ -74,6 +78,7 @@ const ProductForm = ({ product, onClose }) => {
               required
             />
           </div>
+
           <div className="mb-4">
             <label className="block font-medium mb-1">Description</label>
             <textarea
@@ -84,6 +89,7 @@ const ProductForm = ({ product, onClose }) => {
               required
             ></textarea>
           </div>
+
           <div className="mb-4">
             <label className="block font-medium mb-1">Price</label>
             <input
@@ -95,6 +101,7 @@ const ProductForm = ({ product, onClose }) => {
               required
             />
           </div>
+
           <div className="mb-4">
             <label className="block font-medium mb-1">Stock</label>
             <input
@@ -106,6 +113,7 @@ const ProductForm = ({ product, onClose }) => {
               required
             />
           </div>
+
           <div className="mb-4">
             <label className="block font-medium mb-1">Category ID</label>
             <input
@@ -116,11 +124,12 @@ const ProductForm = ({ product, onClose }) => {
               className="w-full border px-3 py-2 rounded"
             />
           </div>
+
           <div className="mb-4">
             <label className="block font-medium mb-1">Image</label>
             <input
               type="file"
-              name="image"
+              name="image_cover"
               onChange={handleFileChange}
               className="w-full border px-3 py-2 rounded"
               accept="image/*"

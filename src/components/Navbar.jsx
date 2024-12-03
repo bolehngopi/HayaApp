@@ -204,6 +204,13 @@ export const Navbar = () => {
           >
             Profile
           </NavLink>
+          <NavLink
+            className="block px-4 py-2 hover:bg-gray-200"
+            to="cart"
+            onClick={() => setIsOpen(false)}
+          >
+            Cart
+          </NavLink>
         </nav>
       )}
     </header>

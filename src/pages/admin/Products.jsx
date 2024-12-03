@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import apiClient from "../../api/apiClient";
-import ProductForm from "../../components/ProductForm";
+import ProductForm from "../../components/Form/ProductForm";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
