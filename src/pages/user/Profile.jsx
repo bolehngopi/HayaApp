@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/useAuth";
 import apiClient from "../../api/apiClient";
 import { useState } from "react";
 import { useEffect } from "react";
+import { useContext } from "react";
+import { AuthContext } from "../../providers/AuthProvider";
 
 export const Profile = () => {
-  const { session, logout } = useAuth();
+  const { session, logout, user } = useContext(AuthContext);
   const [profile, setProfile] = useState({});
   const navigate = useNavigate();
 

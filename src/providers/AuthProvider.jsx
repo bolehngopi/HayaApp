@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import apiClient from "../api/apiClient";
-import { AuthContext } from "../context/AuthContext";
+import { createContext } from "react";
+
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(() => {

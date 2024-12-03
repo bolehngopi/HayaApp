@@ -53,6 +53,9 @@ export const Navbar = () => {
               <NavLink className="hover:text-gray-300" to="categories">
                 Categories
               </NavLink>
+              <NavLink className="hover:text-gray-300" to="search">
+                Search
+              </NavLink>
             </nav>
 
             {/* Profile & Auth Actions */}

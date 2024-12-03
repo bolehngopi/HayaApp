@@ -81,7 +81,7 @@ const AdminProducts = () => {
       {loading ? (
         <div>Loading...</div>
       ) : (
-        <div className="bg-white shadow-md rounded">
+        <div className="bg-white shadow-md rounded p-4">
           <div className="flex justify-between p-4">
             <button
               onClick={handleCreate}
@@ -108,7 +108,7 @@ const AdminProducts = () => {
               {products.map((product) => (
                 <tr key={product.id}>
                   <td className="border p-2">{product.name}</td>
-                  <td className="border p-2">{product.price}</td>
+                  <td className="border p-2">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(product.price)}</td>
                   <td className="border p-2">{product.stock}</td>
                   <td className="border p-2">{product.description}</td>
                   <td className="border p-2">

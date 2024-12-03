@@ -8,6 +8,7 @@ const ProductForm = ({ product, onClose }) => {
     price: product?.price || "",
     stock: product?.stock || "",
     category_id: product?.category_id || "",
+    image_cover: null, // For storing the uploaded image file
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,15 +17,28 @@ const ProductForm = ({ product, onClose }) => {
     e.preventDefault();
     setLoading(true);
 
+    const formDataToSubmit = new FormData();
+
+    // Append all form data fields to FormData object
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value) {
+        formDataToSubmit.append(key, value);
+      }
+    });
+
     try {
       const response = product
-        ? await apiClient.put(`/products/${product.id}`, formData)
-        : await apiClient.post("/products", formData);
+        ? await apiClient.put(`/products/${product.id}`, formDataToSubmit, {
+            headers: { "Content-Type": "multipart/form-data" },
+          })
+        : await apiClient.post("/products", formDataToSubmit, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
 
       alert(response.data.message);
       onClose();
     } catch (error) {
-      setError("Failed to save product.");
+      setError("Failed to save product.", error);
     } finally {
       setLoading(false);
     }
@@ -33,6 +47,10 @@ const ProductForm = ({ product, onClose }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, image_cover: e.target.files[0] });
   };
 
   return (
@@ -96,6 +114,16 @@ const ProductForm = ({ product, onClose }) => {
               value={formData.category_id}
               onChange={handleChange}
               className="w-full border px-3 py-2 rounded"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block font-medium mb-1">Image</label>
+            <input
+              type="file"
+              name="image"
+              onChange={handleFileChange}
+              className="w-full border px-3 py-2 rounded"
+              accept="image/*"
             />
           </div>
 
