@@ -28,7 +28,7 @@ export const Checkout = () => {
     try {
       const response = await apiClient.get("/auth/profile");
       const data = response.data.data;
-      console.log(data)
+      // console.log(data)
       setShippingInfo((prev) => ({
         ...prev,
         name: data.name,
@@ -48,7 +48,12 @@ export const Checkout = () => {
       const data = response.data;
       setCart(data.cart);
       setTotalPrice(data.total_price);
-      // console.log(cart.length)
+      console.log(cart.length)
+
+      if (!cart.length) {
+        navigate('/cart')
+      }
+
       console.log("Cart data", cart);
     } catch (error) {
       console.log("Error fetching cart", error);

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import apiClient from "../../api/apiClient";
-import { Fragment } from "react";
 import { useAuth } from "../../context/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -20,7 +20,6 @@ const Transactions = () => {
   const fetchTransactions = async () => {
     try {
       const response = await apiClient.get("/checkout");
-      console.log(response);
       setTransactions(response.data);
     } catch (error) {
       console.error("Error fetching transactions:", error);
@@ -39,11 +38,11 @@ const Transactions = () => {
 
   const getStatusClass = (status) => {
     switch (status) {
-      case "Completed":
+      case "completed":
         return "text-green-600 bg-green-100";
-      case "Pending":
+      case "pending":
         return "text-yellow-600 bg-yellow-100";
-      case "Failed":
+      case "canceled":
         return "text-red-600 bg-red-100";
       default:
         return "text-gray-600 bg-gray-100";
@@ -63,13 +62,8 @@ const Transactions = () => {
     return totalAmount / (ppnRate * shippingRate);
   };
 
-  const calculatePPN = (originalAmount) => {
-    return originalAmount * 0.11;
-  };
-
-  const calculateShipping = (originalAmount) => {
-    return originalAmount * 0.01;
-  };
+  const calculatePPN = (originalAmount) => originalAmount * 0.11;
+  const calculateShipping = (originalAmount) => originalAmount * 0.01;
 
   return (
     <div className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -105,7 +99,6 @@ const Transactions = () => {
 
                       return (
                         <Fragment key={transaction.id}>
-                          {/* Main Row */}
                           <tr
                             onClick={() => toggleAccordion(transaction.id)}
                             className="border-t hover:bg-gray-100 cursor-pointer"
@@ -118,40 +111,63 @@ const Transactions = () => {
                                 {formatCurrency(originalAmount)} (Before) +{formatCurrency(ppn)} (PPN) +{formatCurrency(shipping)} (Shipping)
                               </div>
                             </td>
-                            <td
-                              className={`py-2 px-4 rounded ${getStatusClass(
-                                transaction.status
-                              )}`}
-                            >
+                            <td className={`py-2 px-4 ${getStatusClass(transaction.status)}`}>
                               {transaction.status}
                             </td>
                           </tr>
 
-                          {/* Accordion Drawer */}
-                          {openTransactionId === transaction.id && (
-                            <tr>
-                              <td
-                                colSpan={4}
-                                className="bg-gray-50 border-t px-4 py-4"
+                          <AnimatePresence>
+                            {openTransactionId === transaction.id && (
+                              <motion.tr
+                                initial={{ opacity: 0, maxHeight: 0 }}
+                                animate={{ opacity: 1, maxHeight: 400 }}
+                                exit={{ opacity: 0, maxHeight: 0 }}
+                                transition={{
+                                  duration: 0.5,
+                                  ease: [0.25, 0.1, 0.25, 1], // Smooth cubic bezier easing
+                                }}
+                                className="overflow-hidden"
                               >
-                                <div className="space-y-2">
-                                  <h2 className="text-lg font-semibold">
-                                    Transaction Details
-                                  </h2>
-                                  <ul className="list-disc list-inside text-gray-700">
-                                    {transaction.items &&
-                                      transaction.items.map((item, index) => (
-                                        <li key={index}>
-                                          <strong>{item.product.name}</strong> -{" "}
-                                          {item.quantity} x{" "}
-                                          {formatCurrency(item.product.price)}
-                                        </li>
-                                      ))}
-                                  </ul>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
+                                <td colSpan={4} className="bg-gray-50 border-t px-4 py-4">
+                                  <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{
+                                      duration: 0.3,
+                                      ease: "easeInOut",
+                                    }}
+                                    className="space-y-4"
+                                  >
+                                    <h2 className="text-lg font-semibold">Transaction Details</h2>
+                                    <ul className="list-disc list-inside text-gray-700">
+                                      {transaction.items &&
+                                        transaction.items.map((item, index) => (
+                                          <li key={index}>
+                                            <strong>{item.product.name}</strong> - {item.quantity} x{" "}
+                                            {formatCurrency(item.product.price)}
+                                          </li>
+                                        ))}
+                                    </ul>
+                                    <div className="border-t pt-4 space-y-2">
+                                      <p>
+                                        <strong>Shipping Address:</strong>
+                                        <br />
+                                        {transaction.shipping_address}
+                                      </p>
+                                      <p>
+                                        <strong>User ID:</strong> {transaction.user_id}
+                                      </p>
+                                      <p>
+                                        <strong>Updated At:</strong>{" "}
+                                        {new Date(transaction.updated_at).toLocaleString()}
+                                      </p>
+                                    </div>
+                                  </motion.div>
+                                </td>
+                              </motion.tr>
+                            )}
+                          </AnimatePresence>
                         </Fragment>
                       );
                     })}
